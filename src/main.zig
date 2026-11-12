@@ -1,3 +1,4 @@
+const std = @import("std");
 const r4os = @import("r4os");
 const r4std = @import("r4std");
 
@@ -7,8 +8,8 @@ const central_path = "C:\\R4OS\\CONFIG\\R4CFG.R4S";
 const document_path = "C:\\R4OS\\CONFIG\\R4CFGDOC.R4S";
 const local_path = "C:\\DIAG\\R4CFGD.R4S";
 
-pub fn r4_app_main(r4_app: *r4os.App) i32 {
-    if (!r4std.init(r4_app.startContext())) return r4os.abi.err_no_group;
+pub fn r4_app_main(r4_app: *r4os.App2) i32 {
+    if (!r4std.init2(r4_app.startContext())) return r4os.abi.err_no_group;
     var ctx = r4_app.system();
     var ok = true;
 
@@ -28,7 +29,7 @@ fn checkMissing(ctx: *r4os.r4sys.Context) bool {
     _ = ctx.fileDelete(missing_path);
     var title: [32]u8 = undefined;
     const result = r4std.config.readString(ctx, missing_path, "TITLE", "Default", title[0..]);
-    const ok = result == r4std.config.result_defaulted and equals(spanZ(title[0..]), "Default");
+    const ok = result == r4std.config.result_defaulted and std.mem.eql(u8, std.mem.sliceTo(title[0..], 0), "Default");
     ctx.print("missing/default: ");
     ctx.println(if (ok) "OK" else "FAILED");
     return ok;
@@ -45,7 +46,7 @@ fn checkBroken(ctx: *r4os.r4sys.Context) bool {
     const flag_result = r4std.config.readBool(ctx, broken_path, "FLAG", true, &flag);
 
     const ok = title_result == r4std.config.result_ok and
-        equals(spanZ(title[0..]), "Kept") and
+        std.mem.eql(u8, std.mem.sliceTo(title[0..], 0), "Kept") and
         count_result == r4std.config.result_defaulted and
         count == 9 and
         flag_result == r4std.config.result_defaulted and
@@ -77,7 +78,7 @@ fn checkWriteRead(ctx: *r4os.r4sys.Context, path: [*:0]const u8, label: []const 
 
     var file: [512]u8 = undefined;
     const file_len = ctx.fileRead(path, file[0..]);
-    const canonical = file_len > 0 and startsWith(file[0..@intCast(file_len)], r4std.settings.utf8_bom);
+    const canonical = file_len > 0 and std.mem.startsWith(u8, file[0..@intCast(file_len)], r4std.settings.utf8_bom);
     const ok = title_result >= 0 and
         bool_result == r4std.config.result_ok and
         u32_result == r4std.config.result_ok and
@@ -88,7 +89,7 @@ fn checkWriteRead(ctx: *r4os.r4sys.Context, path: [*:0]const u8, label: []const 
         read_count == r4std.config.result_ok and
         read_offset == r4std.config.result_ok and
         read_color == r4std.config.result_ok and
-        equals(spanZ(title[0..]), label) and
+        std.mem.eql(u8, std.mem.sliceTo(title[0..], 0), label) and
         enabled and
         count == 42 and
         offset == -4 and
@@ -128,43 +129,13 @@ fn checkDocumentSave(ctx: *r4os.r4sys.Context) bool {
     const ok = created == r4std.config.result_created and
         updated == r4std.config.result_ok and
         rejected == r4std.config.error_invalid_value and
-        startsWith(bytes, r4std.settings.utf8_bom) and
-        contains(bytes, "SCHEMA=R4CFGDOC") and
-        contains(bytes, "MODE=SECOND") and
-        !contains(bytes, "MODE=BAD") and
+        std.mem.startsWith(u8, bytes, r4std.settings.utf8_bom) and
+        (std.mem.indexOf(u8, bytes, "SCHEMA=R4CFGDOC") != null) and
+        (std.mem.indexOf(u8, bytes, "MODE=SECOND") != null) and
+        (std.mem.indexOf(u8, bytes, "MODE=BAD") == null) and
         !r4std.config.hasDocumentSaveLeftovers(ctx, document_path);
 
     ctx.print("document/save: ");
     ctx.println(if (ok) "OK" else "FAILED");
     return ok;
-}
-
-fn spanZ(buf: []const u8) []const u8 {
-    var end: usize = 0;
-    while (end < buf.len and buf[end] != 0) : (end += 1) {}
-    return buf[0..end];
-}
-
-fn equals(a: []const u8, b: []const u8) bool {
-    if (a.len != b.len) return false;
-    var i: usize = 0;
-    while (i < a.len) : (i += 1) {
-        if (a[i] != b[i]) return false;
-    }
-    return true;
-}
-
-fn startsWith(value: []const u8, prefix: []const u8) bool {
-    if (value.len < prefix.len) return false;
-    return equals(value[0..prefix.len], prefix);
-}
-
-fn contains(value: []const u8, needle: []const u8) bool {
-    if (needle.len == 0) return true;
-    if (value.len < needle.len) return false;
-    var index: usize = 0;
-    while (index + needle.len <= value.len) : (index += 1) {
-        if (equals(value[index .. index + needle.len], needle)) return true;
-    }
-    return false;
 }

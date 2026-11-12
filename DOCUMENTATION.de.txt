@@ -1,26 +1,20 @@
-﻿R4CFGD.R4X
+R4CFGD.R4X
 ==========
 
-R4CFGD.R4X ist die R4STD-/R4S-Konfigurationsdiagnose.
+Stand 0.90.80 / Modul 0.1.6
 
-Projektstruktur seit 0.51.21:
-- `build.zig` baut die Diagnose als eigenes SDK-Projekt.
-- `build.zig.zon` bindet `r4os_sdk` als Paket.
-- `module.R4MF` beschreibt Artefakt, Zielpfad, R4L-Imports und Contract.
+App2 und r4std.init2 ersetzen den alten Startanschluss. Die unabhaengigen R4STD-Interfaces SETTINGS_V1 und CONFIG_V1 bleiben in Revision 1. Fehlend/defekt/Default, zentrale/lokale Persistenz, Bool/U32/I32/RGB, UTF8-BOM sowie atomarer Dokumentwechsel und Ablehnung des defekten Dokuments behalten ihre Erwartungen. Begrenzte Standardbibliothekshelfer ersetzen private Textschleifen.
 
-Build:
+Build vom Workspace-Root:
+    ./Repositories/Diagnostics/R4CfgDiag/Build.sh
+Unter Windows den entsprechenden Build.bat-Starter verwenden.
+Artefakt: Artifacts/Modules/R4CfgDiag/R4CFGD.R4X
+Manifest: Repositories/Diagnostics/R4CfgDiag/module.R4MF
+Profil: r4os-zig-generation2; Klasse console; IMAGE_SCOPE=test.
 
-    cd Code\System\Diagnostics\R4CfgDiag
-    ..\..\..\DevTools\Zig\zig.exe build
+module.R4MF ist die Quelle fuer Version, Imports, Ziel und Einstieg.
+Die Bibliotheks-/API-Vertraege liegen beim jeweiligen Besitzer; das SDK
+setzt weder Berechtigungen noch eine zusaetzliche Runtime voraus.
 
-Ergebnis:
-
-    Code\System\Diagnostics\R4CfgDiag\zig-out\R4CFGD.R4X
-
-Contract:
-- Build-Profil: `Zig/R4XStart`
-- R4XStart-Entry: `r4cfgd_main`
-- App-Klasse: `console`
-- R4L-Imports: `R4SYS:Query:1`, `R4STD:SETTINGS_V1:1`,
-  `R4STD:CONFIG_V1:1`
-- Zielpfad im Image: `C:\R4OS\SOFTWARE\TERMINAL\DIAG\R4CFGD.R4X`
+Der technische R4STD:Query2:2-Import bindet die Library-Transportgeneration;
+die genannten fachlichen Interfaces bleiben unabhaengig in Revision 1.

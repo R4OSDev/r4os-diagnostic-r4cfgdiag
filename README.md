@@ -1,10 +1,10 @@
-﻿# R4CFGD.R4X
+# R4CFGD.R4X
 
 `R4CFGD.R4X` is an independent R4OS diagnostic program implemented in Zig.
 
 ## Package
 
-- Version: `0.1.3`
+- Version: `0.1.6`
 - Image target: `/R4OS/SOFTWARE/TERMINAL/DIAG/R4CFGD.R4X`
 - Image scope: `test`
 - Canonical project manifest: `module.R4MF`
@@ -38,3 +38,5 @@ Detailed German technical notes from the migration are preserved in
 Original R4OS material is licensed under Apache License 2.0. See `LICENSE`
 and `NOTICE`. Any repository-specific external material is documented in
 `THIRD_PARTY_NOTICES.md`.
+
+Generation 2: Start2/Query2; independent R4STD interfaces keep revision 1.
